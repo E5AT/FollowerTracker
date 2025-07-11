@@ -1,0 +1,7 @@
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\bin\Debug\FollowerTracker.exe.config
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\bin\Debug\FollowerTracker.exe
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\bin\Debug\FollowerTracker.pdb
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\obj\Debug\FollowerTracker.csproj.AssemblyReference.cache
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\obj\Debug\FollowerTracker.csproj.CoreCompileInputs.cache
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\obj\Debug\FollowerTracker.exe
+C:\Users\esate\source\repos\FollowerTracker\FollowerTracker\obj\Debug\FollowerTracker.pdb
