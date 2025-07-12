@@ -37,6 +37,7 @@ namespace FollowerTracker
             {
                 Console.WriteLine(record);
             }
+            r.Close();
         }
         public static string AnswerGetter()
         {
@@ -49,10 +50,16 @@ namespace FollowerTracker
             return answer;
         }
 
+        public static void Separator()
+        {
+            Console.WriteLine("---------");
+        }
+
         static void Main(string[] args)
         {
             while (true)
             {
+                Separator();
                 Console.WriteLine("[1] - View already existing records");
                 Console.WriteLine("[2] - Add new record");
                 Console.WriteLine("[3] - Delete record");
@@ -60,6 +67,7 @@ namespace FollowerTracker
                 switch (int.Parse(AnswerGetter()))
                 {
                     case 1:
+                        Separator();
                         List<string> records = ViewRecord();
                         if(records.Count == 0)
                             Console.WriteLine("There's no any records!");
@@ -72,10 +80,28 @@ namespace FollowerTracker
                             Console.WriteLine("[0] - Back");
                             int choice = int.Parse(AnswerGetter());
                             if (choice == 0) break;
+                            Separator();
                             PrintContent(path + $"\\{records[choice - 1]}");
-                            Console.ReadLine();
-                            //create separators for between the answers
                         }
+                        break;
+                    case 2:
+                        Separator();
+                        Console.WriteLine("Please enter records:");
+                        List<string> followers = new List<string>();
+
+                        while(true)
+                        {
+                            string answer = Console.ReadLine();
+                            if (answer == string.Empty) break;
+                            followers.Add(answer);
+                        }
+
+                        string now = DateTime.Now.ToString("dd-mm-yyyy_HH-mm");
+                        StreamWriter w = new StreamWriter(path+$"\\{now}.txt");
+                        foreach(string follower in followers)
+                            w.WriteLine(follower);
+                        w.Close();
+                        Console.WriteLine($"New record added: {now}.txt");
                         break;
 
                 }
