@@ -23,7 +23,7 @@ namespace FollowerTracker
 
             return records;
         }
-        public static void PrintContent(string path)
+        public static List<string> RecordReader(string path)
         {
             StreamReader r = new StreamReader(path);
             List<string> recordContent = new List<string>();
@@ -33,11 +33,16 @@ namespace FollowerTracker
                 recordContent.Add(line);
                 line = r.ReadLine();
             }
+            r.Close();
+            return recordContent;
+        }
+        public static void PrintContent(string path)
+        {
+            List<string> recordContent = RecordReader(path);
             foreach(string record in recordContent)
             {
                 Console.WriteLine(record);
             }
-            r.Close();
         }
         public static string AnswerGetter()
         {
@@ -92,18 +97,32 @@ namespace FollowerTracker
                         while(true)
                         {
                             string answer = Console.ReadLine();
+                            if(answer== "·") answer = Console.ReadLine();
                             if (answer == string.Empty) break;
                             followers.Add(answer);
                         }
 
-                        string now = DateTime.Now.ToString("dd-mm-yyyy_HH-mm");
+                        string now = DateTime.Now.ToString("dd-MM-yyyy_HH-mm");
                         StreamWriter w = new StreamWriter(path+$"\\{now}.txt");
                         foreach(string follower in followers)
                             w.WriteLine(follower);
                         w.Close();
                         Console.WriteLine($"New record added: {now}.txt");
                         break;
+                    case 4:
+                        List<string> records0 = ViewRecord();
+                        List<string> newestRecord = RecordReader(path + $"\\{records0[records0.Count - 1]}");
+                        List<string> postNewestRecord = RecordReader(path + $"\\{records0[records0.Count - 2]}");
 
+                        Console.WriteLine("New followers:");
+                        foreach(string record in newestRecord.Except(postNewestRecord).ToList())
+                            Console.WriteLine(record);
+
+                        Console.WriteLine("Followers that no longer follow you:");
+                        foreach (string record in postNewestRecord.Except(newestRecord).ToList())
+                            Console.WriteLine(record);
+
+                        break;
                 }
             }
         }
