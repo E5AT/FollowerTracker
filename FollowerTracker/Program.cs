@@ -62,68 +62,116 @@ namespace FollowerTracker
 
         static void Main(string[] args)
         {
-            while (true)
+            try
             {
-                Separator();
-                Console.WriteLine("[1] - View already existing records");
-                Console.WriteLine("[2] - Add new record");
-                Console.WriteLine("[3] - Delete record");
-                Console.WriteLine("[4] - Analysis");
-                switch (int.Parse(AnswerGetter()))
+                bool stop = false;
+                while (!stop)
                 {
-                    case 1:
-                        Separator();
-                        List<string> records = ViewRecord();
-                        if(records.Count == 0)
-                            Console.WriteLine("There's no any records!");
-                        else
-                        {
-                            Console.WriteLine("These are the available records:");
-                            int num = 1;
-                            foreach(string record in records)
-                                Console.WriteLine($"[{num++}] - {record}");
-                            Console.WriteLine("[0] - Back");
-                            int choice = int.Parse(AnswerGetter());
-                            if (choice == 0) break;
+                    Separator();
+                    Console.WriteLine("[1] - View already existing records");
+                    Console.WriteLine("[2] - Add new record");
+                    Console.WriteLine("[3] - Delete record");
+                    Console.WriteLine("[4] - Analysis");
+                    Console.WriteLine("[0] - Quit");
+                    switch (int.Parse(AnswerGetter()))
+                    {
+                        case 0:
+                            stop = true;
+                            break;
+                        case 1:
                             Separator();
-                            PrintContent(path + $"\\{records[choice - 1]}");
-                        }
-                        break;
-                    case 2:
-                        Separator();
-                        Console.WriteLine("Please enter records:");
-                        List<string> followers = new List<string>();
+                            List<string> records = ViewRecord();
+                            if (records.Count == 0)
+                                Console.WriteLine("There's no any records!");
+                            else
+                            {
+                                Console.WriteLine("These are the available records:");
+                                int num = 1;
+                                foreach (string record in records)
+                                    Console.WriteLine($"[{num++}] - {record}");
+                                Console.WriteLine("[0] - Back");
+                                int choice = int.Parse(AnswerGetter());
+                                if (choice == 0) break;
+                                Separator();
+                                PrintContent(path + $"\\{records[choice - 1]}");
+                            }
+                            break;
+                        case 2:
+                            Separator();
+                            bool terminate = false;
+                            Console.WriteLine("Please enter records(Enter '*' to quit without saving or ' ' to save record):");
+                            List<string> followers = new List<string>();
 
-                        while(true)
-                        {
-                            string answer = Console.ReadLine();
-                            if(answer== "·") answer = Console.ReadLine();
-                            if (answer == string.Empty) break;
-                            followers.Add(answer);
-                        }
+                            while (true)
+                            {
+                                string answer = Console.ReadLine();
+                                if (answer == "·") answer = Console.ReadLine();
+                                if (answer == string.Empty) break;
+                                if (answer == "*")
+                                {
+                                    Console.WriteLine();
+                                    Console.WriteLine("Record entering proccess terminated!");
+                                    terminate = true;
+                                    break;
+                                }
+                                followers.Add(answer);
+                            }
+                            if (!terminate)
+                            {
+                                string now = DateTime.Now.ToString("dd-MM-yyyy_HH-mm");
+                                StreamWriter w = new StreamWriter(path + $"\\{now}.txt");
+                                foreach (string follower in followers)
+                                    w.WriteLine(follower);
+                                w.Close();
+                                Console.WriteLine($"New record added: {now}.txt");
+                            }
+                            break;
+                        case 3:
+                            List<string> recordc = ViewRecord();
+                            Separator();
+                            Console.WriteLine("Please select a record to delete:");
+                            int number = 1;
+                            foreach (string record in recordc)
+                                Console.WriteLine($"[{number++}] - {record}");
+                            Console.WriteLine("[0] - Back");
+                            int choice0 = int.Parse(AnswerGetter());
+                            if (choice0 == 0) break;
+                            System.IO.File.Delete(path + $"\\{recordc[choice0 - 1]}");
+                            Console.WriteLine();
+                            Console.WriteLine($"Successfully deleted {recordc[choice0 - 1]}.txt");
+                            break;
+                        case 4:
+                            List<string> records0 = ViewRecord();
+                            if (records0.Count == 0) Console.WriteLine("There's no records!");
+                            else if (records0.Count == 1) Console.WriteLine("Theres only one record!");
+                            else
+                            {
+                                List<string> newestRecord = RecordReader(path + $"\\{records0[records0.Count - 1]}");
+                                List<string> postNewestRecord = RecordReader(path + $"\\{records0[records0.Count - 2]}");
+                                Separator();
+                                Console.WriteLine("New follower/s:");
+                                foreach (string record in newestRecord.Except(postNewestRecord).ToList())
+                                    Console.WriteLine(record);
 
-                        string now = DateTime.Now.ToString("dd-MM-yyyy_HH-mm");
-                        StreamWriter w = new StreamWriter(path+$"\\{now}.txt");
-                        foreach(string follower in followers)
-                            w.WriteLine(follower);
-                        w.Close();
-                        Console.WriteLine($"New record added: {now}.txt");
-                        break;
-                    case 4:
-                        List<string> records0 = ViewRecord();
-                        List<string> newestRecord = RecordReader(path + $"\\{records0[records0.Count - 1]}");
-                        List<string> postNewestRecord = RecordReader(path + $"\\{records0[records0.Count - 2]}");
+                                Console.WriteLine();
 
-                        Console.WriteLine("New followers:");
-                        foreach(string record in newestRecord.Except(postNewestRecord).ToList())
-                            Console.WriteLine(record);
-
-                        Console.WriteLine("Followers that no longer follow you:");
-                        foreach (string record in postNewestRecord.Except(newestRecord).ToList())
-                            Console.WriteLine(record);
-
-                        break;
+                                Console.WriteLine("Follower/s that no longer follow you:");
+                                foreach (string record in postNewestRecord.Except(newestRecord).ToList())
+                                    Console.WriteLine(record);
+                            }
+                            break;
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("There's an ERROR! Please don't do that again!!!");
+            }
+            finally
+            {
+
+                Console.WriteLine();
+                Console.WriteLine("Byee :)!");
             }
         }
     }
