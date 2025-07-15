@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -11,7 +12,11 @@ namespace FollowerTracker
 {
     internal class Program
     {
-        static string path = "C:\\Users\\esate\\source\\repos\\FollowerTracker\\Tracks";
+        static string projectRoot = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)
+                                      .Parent.Parent.Parent.FullName;
+
+        static string path  = Path.Combine(projectRoot, "Tracks");
+
         public static List<string> ViewRecord()
         {
             List<string> records = new List<string>();
@@ -38,6 +43,7 @@ namespace FollowerTracker
         }
         public static void PrintContent(string path)
         {
+            Separator();
             List<string> recordContent = RecordReader(path);
             foreach(string record in recordContent)
             {
@@ -47,10 +53,12 @@ namespace FollowerTracker
         public static string AnswerGetter()
         {
             string answer = null;
-            while (string.IsNullOrEmpty(answer))
+            while (true)
             {
                 Console.Write("Your choice: ");
                 answer = Console.ReadLine();
+                if (answer == null || answer == string.Empty) InvalidCommand();
+                else break;
             }
             return answer;
         }
@@ -60,6 +68,11 @@ namespace FollowerTracker
             Console.WriteLine("---------");
         }
 
+        public static void InvalidCommand()
+        {
+            Separator();
+            Console.WriteLine("Please enter a valid command!");
+        }
         static void Main(string[] args)
         {
             try
@@ -67,18 +80,18 @@ namespace FollowerTracker
                 bool stop = false;
                 while (!stop)
                 {
-                    Separator();
                     Console.WriteLine("[1] - View already existing records");
                     Console.WriteLine("[2] - Add new record");
                     Console.WriteLine("[3] - Delete record");
                     Console.WriteLine("[4] - Analysis");
                     Console.WriteLine("[0] - Quit");
-                    switch (int.Parse(AnswerGetter()))
+                    Console.WriteLine("[/] - Clear command prompt");
+                    switch (AnswerGetter())
                     {
-                        case 0:
+                        case "0":
                             stop = true;
                             break;
-                        case 1:
+                        case "1":
                             Separator();
                             List<string> records = ViewRecord();
                             if (records.Count == 0)
@@ -92,11 +105,14 @@ namespace FollowerTracker
                                 Console.WriteLine("[0] - Back");
                                 int choice = int.Parse(AnswerGetter());
                                 if (choice == 0) break;
-                                Separator();
-                                PrintContent(path + $"\\{records[choice - 1]}");
+                                if (records.Count < choice) InvalidCommand();
+                                else
+                                {
+                                    PrintContent(path + $"\\{records[choice - 1]}");
+                                }
                             }
                             break;
-                        case 2:
+                        case "2":
                             Separator();
                             bool terminate = false;
                             Console.WriteLine("Please enter records(Enter '*' to quit without saving or ' ' to save record):");
@@ -126,7 +142,7 @@ namespace FollowerTracker
                                 Console.WriteLine($"New record added: {now}.txt");
                             }
                             break;
-                        case 3:
+                        case "3":
                             List<string> recordc = ViewRecord();
                             Separator();
                             Console.WriteLine("Please select a record to delete:");
@@ -136,41 +152,63 @@ namespace FollowerTracker
                             Console.WriteLine("[0] - Back");
                             int choice0 = int.Parse(AnswerGetter());
                             if (choice0 == 0) break;
-                            System.IO.File.Delete(path + $"\\{recordc[choice0 - 1]}");
-                            Console.WriteLine();
-                            Console.WriteLine($"Successfully deleted {recordc[choice0 - 1]}.txt");
+                            else if (recordc.Count < choice0) InvalidCommand();
+                            else
+                            {
+                                System.IO.File.Delete(path + $"\\{recordc[choice0 - 1]}");
+                                Console.WriteLine();
+                                Console.WriteLine($"Successfully deleted {recordc[choice0 - 1]}.txt");
+                            }
                             break;
-                        case 4:
+                        case "4":
                             List<string> records0 = ViewRecord();
+                            Separator();
                             if (records0.Count == 0) Console.WriteLine("There's no records!");
                             else if (records0.Count == 1) Console.WriteLine("Theres only one record!");
                             else
                             {
                                 List<string> newestRecord = RecordReader(path + $"\\{records0[records0.Count - 1]}");
                                 List<string> postNewestRecord = RecordReader(path + $"\\{records0[records0.Count - 2]}");
-                                Separator();
+                                
                                 Console.WriteLine("New follower/s:");
-                                foreach (string record in newestRecord.Except(postNewestRecord).ToList())
-                                    Console.WriteLine(record);
+                                if (newestRecord.Except(postNewestRecord).ToList().Count == 0)
+                                    Console.WriteLine("None!");
+                                else
+                                {
+                                    foreach (string record in newestRecord.Except(postNewestRecord).ToList())
+                                        Console.WriteLine(record);
+                                }
 
                                 Console.WriteLine();
 
                                 Console.WriteLine("Follower/s that no longer follow you:");
-                                foreach (string record in postNewestRecord.Except(newestRecord).ToList())
-                                    Console.WriteLine(record);
+                                if (postNewestRecord.Except(newestRecord).ToList().Count == 0)
+                                    Console.WriteLine("None!");
+                                else
+                                {
+                                    foreach (string record in postNewestRecord.Except(newestRecord).ToList())
+                                        Console.WriteLine(record);
+                                }
+                                Separator();
                             }
                             break;
+                        case "/":
+                            Console.Clear();
+                            break;
+                        default:
+                            InvalidCommand();
+                            break;
                     }
+                    Separator();
                 }
             }
             catch (Exception)
             {
+                Separator();
                 Console.WriteLine("There's an ERROR! Please don't do that again!!!");
             }
             finally
             {
-
-                Console.WriteLine();
                 Console.WriteLine("Byee :)!");
             }
         }
